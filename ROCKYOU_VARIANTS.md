@@ -56,3 +56,64 @@ hashcat with a module (hashcat needs OpenCL, which is missing on this box).
   on the GPU while the disk read is the limiter, or run one part per night.
 * Every command above is byte-identical in behaviour to the verifier that opened
   `MCK.wav` with password `123`, so a hit here is trustworthy and a miss is real.
+
+## RockYou2024 — sizes, parts and the low-disk workflow
+
+Two independent distributions exist. The **size-sorted 7z is the one to use if
+space is tight** — it is ~11 GB instead of ~50/146 GB, and it is already split by
+password length so you can prioritise and stream.
+
+| distribution | artifact | size | notes |
+| --- | --- | --- | --- |
+| `trstout/RockYou2024` (magnet `btih:4e3915a8ecf6bc174687533d93975b1ff0bde38a`) | `rockyou2024.zip` | **~46–50 GB** | one part; extracts to `rockyou2024.txt` |
+| same | `rockyou2024.txt` | **~146–160 GB** | the raw list (2 parts in the torrent: zip + txt) |
+| `tManser/RockYou2024-size-sorted` (magnet `btih:866e2005a716f35e2b7d534c322e0c98deef2549`, `xl=11308476707`) | `RockYou2024_size_sorted.7z` | **~11.3 GB** | **split by character length** into small files |
+
+Both are torrents; also mirrored on Kaggle (`bwandowando/common-password-list-rockyou2024-txt`).
+Checksums published with the `trstout` magnet: `rockyou2024.zip` sha256
+`d3380267907a7aa7b6161010632add84ad6f25387915771a9c1f111932a20a19`,
+`rockyou2024.txt` sha256 `457361a871f111014573ab3bda3e0f5dafd489a3217b62fc8cfb14c74d59bb11`.
+
+### Process it without ever extracting 146 GB
+
+The size-sorted archive contains files like
+`RockYou2024 8 character passwords/8_Character_1.txt`, so you can extract one at a
+time straight into the cracker:
+
+```bat
+7z l RockYou2024_size_sorted.7z
+:: one inner file -> stdout -> GPU, no extraction to disk
+7z x -so RockYou2024_size_sorted.7z "RockYou2024 8 character passwords/8_Character_1.txt" ^
+  | ds_gpu.exe --hash c3891fa82c0a842db941d5d4656b35f69ecd45f6 --wordlist - --batch 33554432
+```
+
+Recommended length order (a DeepSound GUI password is usually 6–12 chars):
+**8, 9, 7, 10, 6, 11, 12**, then the rest. Each length bucket is a few GB at most,
+so peak disk use is the 11 GB archive.
+
+From the full 146 GB list you can also stream directly if it is gzipped:
+
+```bat
+zcat rockyou2024.txt.gz | ds_gpu.exe --hash <H> --wordlist - --batch 33554432
+```
+
+### Time
+
+Download: torrent, so it depends on seeds — `size / your line rate`, plus swarm
+speed. The size-sorted 11 GB is typically 15–60 min on a decent connection; the
+50 GB zip is hours.
+
+Processing on a 3060 (~400 M/s) is not the bottleneck: 10 M ≈ instant, 64 M ≈ 1 s,
+9.9 G ≈ 25 s of GPU — so **disk read (~1 GB/s) dominates**: ~2.5 min for 146 GB,
+~12 s for 11 GB.
+
+### Cheaper first (do these before any big download)
+
+| list | lines | download | GPU time @400 M/s |
+| --- | --- | --- | --- |
+| `xato-net-10-million-passwords.txt` | 10 M | ~90 MB | instant |
+| `xato-net-10-million-passwords-1000000.txt` | 1 M | ~9 MB | instant |
+| `crackstation-human-only.txt.gz` | 64 M | ~500 MB | ~1 s |
+| Kaonashi (Vietnamese) | ~1 B | repo | ~2.5 s |
+| RockYou2024 size-sorted | 9.9 G | **~11 GB** | ~25 s + disk |
+| RockYou2024 full | 9.9 G | ~50–146 GB | ~25 s + disk |

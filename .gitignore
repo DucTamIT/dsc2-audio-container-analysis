@@ -1,0 +1,6 @@
+logs/
+deepsound_out/
+*.exe
+*.o
+__pycache__/
+*.pyc

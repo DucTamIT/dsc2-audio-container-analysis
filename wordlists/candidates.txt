@@ -1,0 +1,82 @@
+# Most plausible DeepSound passwords for "Hát bé thế chả nghe thấy gì?"
+
+Paste these into the DeepSound 2.3 password box, or feed the file to the search tool:
+    ds_gpu --hash c3891fa82c0a842db941d5d4656b35f69ecd45f6 --wordlist candidates.txt
+
+Ordered roughly by how likely I judge them.
+
+hatbe
+hát bé
+hat be
+hatbethe
+hát bé thế
+hatbethechanghethaygi
+hát bé thế chả nghe thấy gì
+hatbethechanghethaygi?
+Hát bé thế chả nghe thấy gì?
+gain
+Gain
+GAIN
+tang_gain
+tang gain
+tanggain
+turnupthegain
+turn up the gain
+turnupthegain
+to_len
+tolên
+to lên
+hát to lên
+hattolen
+hát to lên
+mở to lên
+motolen
+vặn to lên
+vantolen
+bật to lên
+battolen
+tăng âm lượng
+tangamluong
+âm lượng
+amluong
+volume
+Volume
+amplify
+louder
+conchimnon
+con chim non
+Con chim non
+conchimnon.wav
+Con chim non.wav
+thevoice
+TheVoice
+thevoice2026
+The Voice 2026
+the_voice_2026
+giọng hát việt
+gionghatviet
+nobodycanhearyou
+canthearme
+quiet
+quietly
+whisper
+thì thầm
+thitham
+hát khẽ
+hatkhe
+hát nhỏ
+hatnho
+nghe
+thấy
+điếc
+muỗi
+muoi
+hát như muỗi
+hatnhumuoi
+
+## Where the block is
+
+The container is DeepSound DSC2 (`v2 (2024)`) at byte 46 of the WAV, mode 8,
+encrypted, key-check `c3891fa82c0a842db941d5d4656b35f69ecd45f6`.
+KDF: `key = SHA256(UTF-16LE(pw))`, check = `SHA1(AES-256-CBC(key, key[:16], PKCS7(key)))`.
+Legacy scheme (if it were DSCF): `SHA1(pw null-padded to 32)`.

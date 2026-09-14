@@ -142,6 +142,22 @@ Everything below was actually run on this WAV — no need to repeat:
 So the flag lives behind that one password; the DeepSound payload is 16 MB of
 AES-CBC ciphertext and cannot be read without it.
 
+## Validated container format (checked against a known container)
+
+A second container (`MCK.wav`, verif `1756eb343053c3e27e713e53b1f35313f7d9207b`)
+was used to validate the implementation end to end. Its password is `123`
+(rockyou line 3985), which reproduces the stored key-check exactly and extracts a
+valid file. Two corrections came out of that:
+
+| aspect | value |
+| --- | --- |
+| key-check cipher | **AES-256-CBC, PKCS7, IV = key[:16]** (`AESUtils.EncryptData`) |
+| **payload cipher** | **AES-256-ECB, no padding** — the Coder's own Rijndael instance is constructed with `Mode=2` (ECB) and `Padding=1` (None) |
+| info block | `DSSF` + 20-byte NUL-padded file name + 4-byte **big-endian** size, then `size * mode` raw carrier bytes |
+| name padding | `?` is replaced by `X` by the tool; NUL padding is stripped |
+
+So the key-check and the payload use *different* ciphers — a trap worth knowing.
+
 ## Extracting once the password is found
 
 ```bash

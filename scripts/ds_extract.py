@@ -86,10 +86,13 @@ def main() -> int:
         return 2
     print("password  : OK")
 
+    # NOTE: the key-check uses AESUtils (CBC + PKCS7, IV = key[:16]), but the
+    # PAYLOAD is encrypted with the Coder's own Rijndael instance, which the IL
+    # sets to Mode=ECB and Padding=None.  Verified against a known container.
     pos = base + 104
-    aes = AES.new(key, AES.MODE_CBC, key[:16])
-    first = decode(raw[pos:pos + 32 * mode], mode)
-    plain = aes.decrypt(first)
+    ecb = AES.new(key, AES.MODE_ECB)
+    first = ecb.decrypt(decode(raw[pos:pos + 32 * mode], mode))
+    plain = first
     print(f"first block: {plain[:32]!r}")
     try:
         print(f"           : {plain[:32].decode('utf-8', 'replace')}")
@@ -109,19 +112,14 @@ def main() -> int:
         block = decode(raw[pos:pos + 32 * mode], mode)
         if len(block) < 32:
             break
-        info = AES.new(key, AES.MODE_CBC, key[:16]).decrypt(block)
+        info = ecb.decrypt(block)
         if info[:4] != b"DSSF":
             break
-        name = info[4:24].decode("utf-8", "replace").replace("?", "X").strip()
-        size = struct.unpack(">I", info[24:28])[0]
+        name = info[4:24].split(b"\x00")[0].decode("utf-8", "replace").replace("?", "X")
+        size = struct.unpack(">I", info[24:28])[0]      # big-endian
         pos += 32 * mode
-        data_raw = raw[pos:pos + size * mode]
-        data = AES.new(key, AES.MODE_CBC, key[:16]).decrypt(decode(data_raw, mode))
-        try:
-            from Crypto.Util.Padding import unpad
-            data = unpad(data, 16)
-        except Exception:
-            data = data[:size]
+        need = (size + 15) // 16 * 16                    # ciphertext is block aligned
+        data = ecb.decrypt(decode(raw[pos:pos + need * mode], mode))[:size]
         dest = os.path.join(outdir, os.path.basename(name) or f"file{n}")
         open(dest, "wb").write(data)
         print(f"extracted : {dest}  ({len(data)} bytes)")

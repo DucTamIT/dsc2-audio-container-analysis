@@ -117,3 +117,18 @@ Processing on a 3060 (~400 M/s) is not the bottleneck: 10 M ≈ instant, 64 M �
 | Kaonashi (Vietnamese) | ~1 B | repo | ~2.5 s |
 | RockYou2024 size-sorted | 9.9 G | **~11 GB** | ~25 s + disk |
 | RockYou2024 full | 9.9 G | ~50–146 GB | ~25 s + disk |
+
+
+## Status log (host-side runs)
+
+| list | candidates | result |
+| --- | --- | --- |
+| `rockyou.txt` plain | 14 344 391 | NOT FOUND |
+| `rockyou.txt` × John default rules (4 h 28 m, 2.4 M c/s) | ~200 M | NOT FOUND |
+| `rockyou.txt` × best64 | ~900 M | NOT FOUND |
+| `rockyou.txt` × JumboSingle (GPU pipe) | 27 000 000 000 | NOT FOUND |
+| `rockyou.txt` × 30 KDF variants / ×36 AES-128 variants | ~950 M | NOT FOUND |
+| `rockyou.txt` newline / CR / space / BOM / quote variants | 6 × 14.3 M | NOT FOUND |
+| `rockyou.txt` non-ASCII lines, 5 decodings (14 534 lines) | 72 670 | NOT FOUND |
+| `rockyou.txt` via **payload gate** (independent criterion) | 14 344 391 | NOT FOUND |
+| `crackstation-human-only` (`realuniq.lst`) — your run | ~64 M | NOT FOUND |

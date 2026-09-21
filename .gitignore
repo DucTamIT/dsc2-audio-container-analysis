@@ -2,5 +2,19 @@ logs/
 deepsound_out/
 *.exe
 *.o
+*.obj
+*.a
+*.def
 __pycache__/
 *.pyc
+
+# Large archives and tools
+*.7z
+*.zip
+*.tar.gz
+hashcat/
+
+# Large wordlists
+rockyou.txt
+rockyou_2025_01.txt
+test_wordlist_large.txt

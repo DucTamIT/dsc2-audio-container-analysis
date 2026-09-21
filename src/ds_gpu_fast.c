@@ -533,7 +533,7 @@ int main(int argc, char **argv)
 	const char *sep = "";
 	const char *prefix = "", *suffix = "";
 	int use_cpu = 0, device_idx = -1, list_only = 0;
-	size_t batch = (size_t)1 << 21;
+	size_t batch = (size_t)1 << 23;
 	unsigned char target[20];
 	char kpath[4096] = "ds_gpu.cl", inc[4096] = "-I .";
 	int i;
@@ -607,7 +607,7 @@ int main(int argc, char **argv)
 	if (err != CL_SUCCESS) die("queue");
 	cl_program prog = clCreateProgramWithSource(ctx, 1, &ksrc, &ksz, &err);
 	if (err != CL_SUCCESS) die("program");
-	char opts[64] = "-cl-mad-enable";
+	char opts[128] = "-cl-mad-enable -cl-fast-relaxed-math";
 	err = clBuildProgram(prog, 1, &dev, opts, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		size_t ls = 0; clGetProgramBuildInfo(prog, dev, CL_PROGRAM_BUILD_LOG, 0, NULL, &ls);
@@ -722,7 +722,9 @@ int main(int argc, char **argv)
 			clSetKernelArg(kp, 10, sizeof(cl_ulong), &b64);
 			clSetKernelArg(kp, 11, sizeof(cl_uint), &n32);
 			size_t g = n32;
-			clEnqueueNDRangeKernel(q, kp, 1, NULL, &g, NULL, 0, NULL, NULL);
+			size_t local = 256;
+			while (g % local != 0 && local > 32) local /= 2;
+			clEnqueueNDRangeKernel(q, kp, 1, NULL, &g, (g % local == 0) ? &local : NULL, 0, NULL, NULL);
 			clEnqueueReadBuffer(q, hits, CL_TRUE, 0, n32, hitbuf, 0, NULL, NULL);
 			total += n32;
 			for (cl_uint k = 0; k < n32; k++)
